@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { Sun, Moon, ShoppingBag, ChevronRight, X, Trash2, Globe, Minus, Plus } from "lucide-react";
+import { Sun, Moon, ShoppingBag, X, Trash2, Globe, Minus, Plus, CheckCircle, Smartphone, Beaker } from "lucide-react";
 
 // Types for our store
 type Product = {
@@ -17,11 +17,42 @@ type CartItem = Product & {
   quantity: number;
 };
 
+async function sendTestEmail() {
+  const res = await fetch("/api/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      to: "recipient@example.com",
+      subject: "Hello from Next.js SMTP!",
+      text: "This is a plain text message.",
+      html: "<h1>Hello!</h1><p>This is an HTML message.</p>",
+    }),
+  });
+
+  const data = await res.json();
+  if (data.success) {
+    alert("Email sent successfully!");
+  } else {
+    alert("Error sending email: " + data.error);
+  }
+}
+
 export default function Home() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   
+  // --- New Feature States ---
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderComplete, setOrderComplete] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    fullName: "",
+    address: "",
+    phone: ""
+  });
+
   // --- Functional State ---
   const [cart, setCart] = useState<CartItem[]>([]);
 
@@ -45,7 +76,7 @@ export default function Home() {
       }
       return [...prev, { ...product, quantity: 1 }];
     });
-    setIsCartOpen(true); // Open cart automatically when item is added
+    setIsCartOpen(true);
   };
 
   const removeFromCart = (id: number) => {
@@ -67,10 +98,41 @@ export default function Home() {
   const cartTotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
+  // --- Handle Checkout ---
+  const handleCheckoutSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsProcessing(true);
+
+    try {
+      const response = await fetch("/api/send-receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: formData,
+          items: cart,
+          total: cartTotal,
+        }),
+      });
+
+      if (response.ok) {
+        setOrderComplete(true);
+        setCart([]);
+        setTimeout(() => {
+          setIsCheckoutOpen(false);
+          setOrderComplete(false);
+        }, 6000);
+      }
+    } catch (error) {
+      console.error("Payment Confirmation Error:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (!mounted) return null;
 
   return (
-    <div className={`min-h-screen bg-white font-sans text-black transition-colors duration-500 dark:bg-[#050505] dark:text-white ${isCartOpen ? 'overflow-hidden' : ''}`}>
+    <div className={`min-h-screen bg-white font-sans text-black transition-colors duration-500 dark:bg-[#050505] dark:text-white ${isCartOpen || isCheckoutOpen ? 'overflow-hidden' : ''}`}>
       
       {/* --- Announcement Bar --- */}
       <div className="bg-red-600 py-2 text-center text-[9px] font-black uppercase tracking-[0.3em] text-white">
@@ -127,7 +189,7 @@ export default function Home() {
       <section id="shop" className="mx-auto max-w-7xl px-8 py-24">
         <div className="mb-16 flex flex-col justify-between gap-4 border-b border-zinc-100 pb-8 dark:border-zinc-900 md:flex-row md:items-end">
           <h3 className="text-4xl font-black italic tracking-tighter uppercase">ARC COLLECTION</h3>
-          <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Drop 001 / High Velocity</div>
+          <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400">NEW RELEASE</div>
         </div>
 
         <div className="grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
@@ -203,7 +265,9 @@ export default function Home() {
                   <span>Subtotal</span>
                   <span>₱{cartTotal}</span>
                 </div>
-                <button className="w-full bg-red-600 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-white hover:bg-red-700 transition-colors">
+                <button 
+                  onClick={() => { setIsCartOpen(false); setIsCheckoutOpen(true); }}
+                  className="w-full bg-red-600 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-white hover:bg-red-700 transition-colors">
                   Checkout Now
                 </button>
               </div>
@@ -212,13 +276,70 @@ export default function Home() {
         </div>
       </div>
 
-      {/* --- Footer (Condensed) --- */}
+      {/* --- GCash Checkout Modal --- */}
+      {isCheckoutOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => !orderComplete && setIsCheckoutOpen(false)} />
+          <div className="relative w-full max-w-3xl bg-white dark:bg-zinc-950 rounded-2xl p-8 overflow-y-auto max-h-[90vh]">
+            {!orderComplete ? (
+              <form onSubmit={handleCheckoutSubmit} className="grid md:grid-cols-2 gap-12">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-black italic uppercase tracking-tighter">Shipping details</h3>
+                    {/* TEST BUTTON ADDED HERE */}
+                    <button 
+                      type="button" 
+                      onClick={() => handleCheckoutSubmit()} 
+                      className="flex items-center gap-2 text-[8px] font-black uppercase bg-zinc-200 dark:bg-zinc-800 px-3 py-1.5 rounded hover:bg-red-600 hover:text-white transition-colors"
+                    >
+                      <Beaker size={12} /> Test Email (Bypass)
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    <input type="text" placeholder="Full Name" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest" onChange={e => setFormData({...formData, fullName: e.target.value})} />
+                    <input type="email" placeholder="Email" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest" onChange={e => setFormData({...formData, email: e.target.value})} />
+                    <input type="text" placeholder="Phone Number" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest" onChange={e => setFormData({...formData, phone: e.target.value})} />
+                    <textarea placeholder="Full Shipping Address" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest h-32" onChange={e => setFormData({...formData, address: e.target.value})} />
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-center justify-center text-center border-l border-zinc-500/10 pl-8">
+                  <div className="flex items-center gap-2 text-blue-500 mb-6 uppercase font-black text-[10px] tracking-widest">
+                    <Smartphone size={16} /> GCash QR Payment
+                  </div>
+                  <div className="bg-white p-3 rounded-xl border-4 border-blue-500 mb-6">
+                    <img src="/gcash.jpg" alt="GCash QR Code" className="w-48 h-48 object-contain" />
+                  </div>
+                  <p className="text-[10px] font-bold text-zinc-400 mb-8 uppercase tracking-widest leading-relaxed">
+                    Scan the QR code to pay <span className="text-black dark:text-white">₱{cartTotal}</span>. Once paid, click confirm to receive your receipt.
+                  </p>
+                  <button 
+                    disabled={isProcessing}
+                    type="submit" 
+                    className="w-full bg-blue-600 text-white py-5 rounded font-black uppercase text-[10px] tracking-[0.3em] hover:bg-blue-700 transition-all"
+                  >
+                    {isProcessing ? "Verifying..." : "Confirm Payment"}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="py-20 text-center animate-in fade-in duration-700">
+                <CheckCircle size={80} className="text-green-500 mx-auto mb-6" />
+                <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-4">Payment Received</h3>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">A receipt has been sent to {formData.email}</p>
+                <p className="mt-12 text-[8px] font-black uppercase tracking-widest animate-pulse">Closing in a few seconds...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* --- Footer --- */}
       <footer className="bg-zinc-100 px-8 py-20 dark:bg-zinc-900 text-center">
         <h1 className="text-4xl font-black italic tracking-tighter uppercase mb-4">ARC APPAREL</h1>
         <p className="text-[9px] font-bold tracking-[0.4em] text-zinc-400 uppercase mb-8">© 2026 ARC APPAREL GROUP LTD.</p>
         <div className="flex justify-center gap-6">
-    
-            <Globe size={18} className="hover:text-red-600 cursor-pointer" />
+          <Globe size={18} className="hover:text-red-600 cursor-pointer" />
         </div>
       </footer>
     </div>
