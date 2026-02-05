@@ -133,7 +133,7 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((item) => (
             <div key={item.id} className="group">
-              <div className="relative aspect-[4/5] overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+              <div className="relative aspect-[4/5] overflow-hidden border border-zinc-100 dark:border-zinc-900">
                 <img src={item.img} alt={item.name} className="h-full w-full object-contain p-8 transition-transform duration-700 group-hover:scale-110" />
               </div>
               <div className="mt-6 space-y-1">
