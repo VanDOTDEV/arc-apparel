@@ -2,9 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { Sun, Moon, ShoppingBag, X, Trash2, Globe, Minus, Plus, CheckCircle, Smartphone, Beaker } from "lucide-react";
+import { 
+  Sun, Moon, ShoppingBag, X, Trash2, Globe, 
+  Minus, Plus, CheckCircle, Smartphone, Beaker 
+} from "lucide-react";
 
-// Types for our store
+// --- Types ---
 type Product = {
   id: number;
   name: string;
@@ -17,32 +20,12 @@ type CartItem = Product & {
   quantity: number;
 };
 
-async function sendTestEmail() {
-  const res = await fetch("/api/send-email", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      to: "recipient@example.com",
-      subject: "Hello from Next.js SMTP!",
-      text: "This is a plain text message.",
-      html: "<h1>Hello!</h1><p>This is an HTML message.</p>",
-    }),
-  });
-
-  const data = await res.json();
-  if (data.success) {
-    alert("Email sent successfully!");
-  } else {
-    alert("Error sending email: " + data.error);
-  }
-}
-
 export default function Home() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   
-  // --- New Feature States ---
+  // --- Checkout States ---
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -53,9 +36,10 @@ export default function Home() {
     phone: ""
   });
 
-  // --- Functional State ---
+  // --- Cart State ---
   const [cart, setCart] = useState<CartItem[]>([]);
 
+  // Fix hydration mismatch
   useEffect(() => setMounted(true), []);
 
   const products: Product[] = [
@@ -64,6 +48,11 @@ export default function Home() {
     { id: 3, name: "PUT GOD FIRST", price: 599, img: "/godfirst.png", category: "Apparel" },
     { id: 4, name: "ARC FUTURE HOODIES", price: 1399, img: "/create.png", category: "Apparel" },
   ];
+
+  // --- Theme Toggle Function ---
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   // --- Cart Functions ---
   const addToCart = (product: Product) => {
@@ -98,7 +87,7 @@ export default function Home() {
   const cartTotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  // --- Handle Checkout ---
+  // --- Checkout Execution ---
   const handleCheckoutSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setIsProcessing(true);
@@ -123,7 +112,7 @@ export default function Home() {
         }, 6000);
       }
     } catch (error) {
-      console.error("Payment Confirmation Error:", error);
+      console.error("Order Processing Error:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -132,18 +121,19 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className={`min-h-screen bg-white font-sans text-black transition-colors duration-500 dark:bg-[#050505] dark:text-white ${isCartOpen || isCheckoutOpen ? 'overflow-hidden' : ''}`}>
+    /* Changed bg-white text-black to bg-background text-foreground to sync with your globals.css */
+    <div className={`min-h-screen transition-colors duration-700 ease-in-out bg-background text-foreground ${isCartOpen || isCheckoutOpen ? 'overflow-hidden' : ''}`}>
       
       {/* --- Announcement Bar --- */}
       <div className="bg-red-600 py-2 text-center text-[9px] font-black uppercase tracking-[0.3em] text-white">
-        Free Shipping on all orders over ₱100 — Shop the Debut Drop
+        Free Shipping on all orders over ₱100 — Shop the ARC Debut Drop
       </div>
 
       {/* --- Navigation --- */}
-      <nav className="sticky top-0 z-50 w-full border-b border-zinc-950/5 bg-white/80 backdrop-blur-xl dark:border-white/5 dark:bg-black/80">
+      <nav className="sticky top-0 z-50 w-full border-b border-zinc-950/5 bg-background/80 backdrop-blur-xl dark:border-white/5">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex flex-col leading-none cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-            <h1 className="text-2xl font-black italic tracking-tighter text-black dark:text-white">ARC</h1>
+            <h1 className="text-2xl font-black italic tracking-tighter">ARC</h1>
             <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-red-600">Apparel</span>
           </div>
 
@@ -154,9 +144,20 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-6">
-            <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="hover:opacity-50 transition-opacity">
-              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            {/* Theme Toggle Button */}
+            <button 
+              onClick={toggleTheme} 
+              className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-300"
+              aria-label="Toggle Dark Mode"
+            >
+              {theme === "dark" ? (
+                <Sun size={18} className="text-yellow-400 fill-yellow-400/20" />
+              ) : (
+                <Moon size={18} className="text-zinc-900" />
+              )}
             </button>
+
+            {/* Cart Button */}
             <button onClick={() => setIsCartOpen(true)} className="relative group">
               <ShoppingBag size={20} strokeWidth={2.5} className="group-hover:text-red-600 transition-colors" />
               {cartCount > 0 && (
@@ -179,7 +180,7 @@ export default function Home() {
           <h2 className="mb-8 text-7xl font-black italic leading-[0.85] tracking-tighter md:text-9xl">
             NOTHING <br /> BUT <span className="text-red-600 not-italic">ARC.</span>
           </h2>
-          <a href="#shop" className="inline-block w-full bg-black px-12 py-5 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-red-600 dark:bg-white dark:text-black dark:hover:bg-red-600 dark:hover:text-white sm:w-auto">
+          <a href="#shop" className="inline-block w-full bg-foreground px-12 py-5 text-[10px] font-black uppercase tracking-widest text-background transition-all hover:bg-red-600 hover:text-white sm:w-auto">
             Shop The Series
           </a>
         </div>
@@ -195,7 +196,7 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((item) => (
             <div key={item.id} className="group">
-              <div className="relative aspect-[4/5] overflow-hidden border border-zinc-100 dark:border-zinc-900">
+              <div className="relative aspect-[4/5] overflow-hidden border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/40">
                 <img src={item.img} alt={item.name} className="h-full w-full object-contain p-8 transition-transform duration-700 group-hover:scale-110" />
               </div>
               <div className="mt-6 space-y-1">
@@ -206,7 +207,7 @@ export default function Home() {
                 </div>
                 <button 
                   onClick={() => addToCart(item)}
-                  className="mt-4 w-full border border-black/10 py-3 text-[9px] font-black uppercase tracking-[0.2em] transition-all hover:bg-black hover:text-white dark:border-white/10 dark:hover:bg-white dark:hover:text-black"
+                  className="mt-4 w-full border border-zinc-950/10 py-3 text-[9px] font-black uppercase tracking-[0.2em] transition-all hover:bg-foreground hover:text-background dark:border-white/10"
                 >
                   Add to Bag +
                 </button>
@@ -216,10 +217,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- Functional Cart Sidebar --- */}
+      {/* --- Cart Sidebar --- */}
       <div className={`fixed inset-0 z-[100] transition-all duration-500 ${isCartOpen ? 'visible' : 'invisible'}`}>
         <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity ${isCartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsCartOpen(false)} />
-        <div className={`absolute right-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-500 dark:bg-zinc-950 ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`absolute right-0 h-full w-full max-w-md bg-background shadow-2xl transition-transform duration-500 ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between p-8 border-b border-zinc-100 dark:border-zinc-900">
               <h3 className="text-xl font-black italic uppercase tracking-tighter">Your Bag ({cartCount})</h3>
@@ -230,14 +231,14 @@ export default function Home() {
               {cart.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center opacity-40">
                   <ShoppingBag size={48} className="mb-4" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">The court is empty.</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest">The bag is empty.</p>
                 </div>
               ) : (
                 <div className="space-y-8">
                   {cart.map((item) => (
                     <div key={item.id} className="flex gap-4">
                       <div className="h-20 w-20 bg-zinc-100 dark:bg-zinc-900 flex-shrink-0">
-                        <img src={item.img} className="h-full w-full object-contain p-2" />
+                        <img src={item.img} className="h-full w-full object-contain p-2" alt={item.name} />
                       </div>
                       <div className="flex flex-1 flex-col justify-between">
                         <div className="flex justify-between">
@@ -276,30 +277,29 @@ export default function Home() {
         </div>
       </div>
 
-      {/* --- GCash Checkout Modal --- */}
+      {/* --- Checkout Modal --- */}
       {isCheckoutOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => !orderComplete && setIsCheckoutOpen(false)} />
-          <div className="relative w-full max-w-3xl bg-white dark:bg-zinc-950 rounded-2xl p-8 overflow-y-auto max-h-[90vh]">
+          <div className="relative w-full max-w-3xl bg-background rounded-2xl p-8 overflow-y-auto max-h-[90vh] shadow-2xl transition-all duration-500">
             {!orderComplete ? (
               <form onSubmit={handleCheckoutSubmit} className="grid md:grid-cols-2 gap-12">
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h3 className="text-2xl font-black italic uppercase tracking-tighter">Shipping details</h3>
-                    {/* TEST BUTTON ADDED HERE */}
                     <button 
                       type="button" 
                       onClick={() => handleCheckoutSubmit()} 
-                      className="flex items-center gap-2 text-[8px] font-black uppercase bg-zinc-200 dark:bg-zinc-800 px-3 py-1.5 rounded hover:bg-red-600 hover:text-white transition-colors"
+                      className="flex items-center gap-2 text-[8px] font-black uppercase bg-zinc-200 dark:bg-zinc-900 px-3 py-1.5 rounded hover:bg-red-600 hover:text-white transition-colors"
                     >
-                      <Beaker size={12} /> Test Email (Bypass)
+                      <Beaker size={12} /> Test Email
                     </button>
                   </div>
                   <div className="space-y-4">
-                    <input type="text" placeholder="Full Name" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest" onChange={e => setFormData({...formData, fullName: e.target.value})} />
-                    <input type="email" placeholder="Email" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest" onChange={e => setFormData({...formData, email: e.target.value})} />
-                    <input type="text" placeholder="Phone Number" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest" onChange={e => setFormData({...formData, phone: e.target.value})} />
-                    <textarea placeholder="Full Shipping Address" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest h-32" onChange={e => setFormData({...formData, address: e.target.value})} />
+                    <input type="text" placeholder="Full Name" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest border-none outline-none focus:ring-1 focus:ring-red-600" onChange={e => setFormData({...formData, fullName: e.target.value})} />
+                    <input type="email" placeholder="Email" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest border-none outline-none focus:ring-1 focus:ring-red-600" onChange={e => setFormData({...formData, email: e.target.value})} />
+                    <input type="text" placeholder="Phone Number" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest border-none outline-none focus:ring-1 focus:ring-red-600" onChange={e => setFormData({...formData, phone: e.target.value})} />
+                    <textarea placeholder="Full Shipping Address" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest h-32 border-none outline-none focus:ring-1 focus:ring-red-600" onChange={e => setFormData({...formData, address: e.target.value})} />
                   </div>
                 </div>
                 
@@ -311,23 +311,23 @@ export default function Home() {
                     <img src="/gcash.jpg" alt="GCash QR Code" className="w-48 h-48 object-contain" />
                   </div>
                   <p className="text-[10px] font-bold text-zinc-400 mb-8 uppercase tracking-widest leading-relaxed">
-                    Scan the QR code to pay <span className="text-black dark:text-white">₱{cartTotal}</span>. Once paid, click confirm to receive your receipt.
+                    Scan to pay <span className="font-black text-foreground">₱{cartTotal}</span>. Then click confirm to process your order.
                   </p>
                   <button 
                     disabled={isProcessing}
                     type="submit" 
-                    className="w-full bg-blue-600 text-white py-5 rounded font-black uppercase text-[10px] tracking-[0.3em] hover:bg-blue-700 transition-all"
+                    className="w-full bg-blue-600 text-white py-5 rounded font-black uppercase text-[10px] tracking-[0.3em] hover:bg-blue-700 transition-all disabled:opacity-50"
                   >
                     {isProcessing ? "Verifying..." : "Confirm Payment"}
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="py-20 text-center animate-in fade-in duration-700">
+              <div className="py-20 text-center">
                 <CheckCircle size={80} className="text-green-500 mx-auto mb-6" />
                 <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-4">Payment Received</h3>
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">A receipt has been sent to {formData.email}</p>
-                <p className="mt-12 text-[8px] font-black uppercase tracking-widest animate-pulse">Closing in a few seconds...</p>
+                <p className="mt-12 text-[8px] font-black uppercase tracking-widest animate-pulse">Returning to store...</p>
               </div>
             )}
           </div>
@@ -335,11 +335,11 @@ export default function Home() {
       )}
 
       {/* --- Footer --- */}
-      <footer className="bg-zinc-100 px-8 py-20 dark:bg-zinc-900 text-center">
+      <footer className="bg-zinc-100 px-8 py-20 dark:bg-zinc-900 text-center border-t border-zinc-200 dark:border-white/5 transition-colors duration-700">
         <h1 className="text-4xl font-black italic tracking-tighter uppercase mb-4">ARC APPAREL</h1>
         <p className="text-[9px] font-bold tracking-[0.4em] text-zinc-400 uppercase mb-8">© 2026 ARC APPAREL GROUP LTD.</p>
         <div className="flex justify-center gap-6">
-          <Globe size={18} className="hover:text-red-600 cursor-pointer" />
+          <Globe size={18} className="hover:text-red-600 cursor-pointer transition-colors" />
         </div>
       </footer>
     </div>
