@@ -49,7 +49,6 @@ export default function Home() {
     { id: 4, name: "ARC FUTURE HOODIES", price: 1399, img: "/create.png", category: "Apparel" },
   ];
 
-  // --- Theme Toggle Function ---
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
@@ -121,8 +120,7 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    /* Changed bg-white text-black to bg-background text-foreground to sync with your globals.css */
-    <div className={`min-h-screen transition-colors duration-700 ease-in-out bg-background text-foreground ${isCartOpen || isCheckoutOpen ? 'overflow-hidden' : ''}`}>
+    <div className={`min-h-screen transition-colors duration-700 ease-in-out bg-white text-black dark:bg-[#050505] dark:text-white ${isCartOpen || isCheckoutOpen ? 'overflow-hidden' : ''}`}>
       
       {/* --- Announcement Bar --- */}
       <div className="bg-red-600 py-2 text-center text-[9px] font-black uppercase tracking-[0.3em] text-white">
@@ -130,7 +128,7 @@ export default function Home() {
       </div>
 
       {/* --- Navigation --- */}
-      <nav className="sticky top-0 z-50 w-full border-b border-zinc-950/5 bg-background/80 backdrop-blur-xl dark:border-white/5">
+      <nav className="sticky top-0 z-50 w-full border-b border-zinc-950/5 bg-white/80 backdrop-blur-xl dark:border-white/5 dark:bg-black/80">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex flex-col leading-none cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
             <h1 className="text-2xl font-black italic tracking-tighter">ARC</h1>
@@ -144,20 +142,13 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-6">
-            {/* Theme Toggle Button */}
             <button 
               onClick={toggleTheme} 
               className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-300"
-              aria-label="Toggle Dark Mode"
             >
-              {theme === "dark" ? (
-                <Sun size={18} className="text-yellow-400 fill-yellow-400/20" />
-              ) : (
-                <Moon size={18} className="text-zinc-900" />
-              )}
+              {theme === "dark" ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} />}
             </button>
 
-            {/* Cart Button */}
             <button onClick={() => setIsCartOpen(true)} className="relative group">
               <ShoppingBag size={20} strokeWidth={2.5} className="group-hover:text-red-600 transition-colors" />
               {cartCount > 0 && (
@@ -180,7 +171,7 @@ export default function Home() {
           <h2 className="mb-8 text-7xl font-black italic leading-[0.85] tracking-tighter md:text-9xl">
             NOTHING <br /> BUT <span className="text-red-600 not-italic">ARC.</span>
           </h2>
-          <a href="#shop" className="inline-block w-full bg-foreground px-12 py-5 text-[10px] font-black uppercase tracking-widest text-background transition-all hover:bg-red-600 hover:text-white sm:w-auto">
+          <a href="#shop" className="inline-block w-full bg-black px-12 py-5 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-red-600 dark:bg-white dark:text-black dark:hover:bg-red-600 dark:hover:text-white sm:w-auto">
             Shop The Series
           </a>
         </div>
@@ -196,7 +187,7 @@ export default function Home() {
         <div className="grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((item) => (
             <div key={item.id} className="group">
-              <div className="relative aspect-[4/5] overflow-hidden border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900/40">
+              <div className="relative aspect-[4/5] overflow-hidden border border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-950">
                 <img src={item.img} alt={item.name} className="h-full w-full object-contain p-8 transition-transform duration-700 group-hover:scale-110" />
               </div>
               <div className="mt-6 space-y-1">
@@ -207,7 +198,7 @@ export default function Home() {
                 </div>
                 <button 
                   onClick={() => addToCart(item)}
-                  className="mt-4 w-full border border-zinc-950/10 py-3 text-[9px] font-black uppercase tracking-[0.2em] transition-all hover:bg-foreground hover:text-background dark:border-white/10"
+                  className="mt-4 w-full border border-black/10 py-3 text-[9px] font-black uppercase tracking-[0.2em] transition-all hover:bg-black hover:text-white dark:border-white/10 dark:hover:bg-white dark:hover:text-black"
                 >
                   Add to Bag +
                 </button>
@@ -220,7 +211,7 @@ export default function Home() {
       {/* --- Cart Sidebar --- */}
       <div className={`fixed inset-0 z-[100] transition-all duration-500 ${isCartOpen ? 'visible' : 'invisible'}`}>
         <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity ${isCartOpen ? 'opacity-100' : 'opacity-0'}`} onClick={() => setIsCartOpen(false)} />
-        <div className={`absolute right-0 h-full w-full max-w-md bg-background shadow-2xl transition-transform duration-500 ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`absolute right-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-500 dark:bg-zinc-950 ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between p-8 border-b border-zinc-100 dark:border-zinc-900">
               <h3 className="text-xl font-black italic uppercase tracking-tighter">Your Bag ({cartCount})</h3>
@@ -277,11 +268,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* --- Checkout Modal --- */}
+      {/* --- FIXED CHECKOUT MODAL --- */}
       {isCheckoutOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => !orderComplete && setIsCheckoutOpen(false)} />
-          <div className="relative w-full max-w-3xl bg-background rounded-2xl p-8 overflow-y-auto max-h-[90vh] shadow-2xl transition-all duration-500">
+          <div className="relative w-full max-w-3xl bg-white dark:bg-zinc-950 rounded-2xl p-8 overflow-y-auto max-h-[90vh] shadow-2xl">
             {!orderComplete ? (
               <form onSubmit={handleCheckoutSubmit} className="grid md:grid-cols-2 gap-12">
                 <div className="space-y-6">
@@ -290,16 +281,41 @@ export default function Home() {
                     <button 
                       type="button" 
                       onClick={() => handleCheckoutSubmit()} 
-                      className="flex items-center gap-2 text-[8px] font-black uppercase bg-zinc-200 dark:bg-zinc-900 px-3 py-1.5 rounded hover:bg-red-600 hover:text-white transition-colors"
+                      className="flex items-center gap-2 text-[8px] font-black uppercase bg-zinc-100 dark:bg-zinc-900 px-3 py-1.5 rounded hover:bg-red-600 hover:text-white transition-colors"
                     >
                       <Beaker size={12} /> Test Email
                     </button>
                   </div>
+                  
+                  {/* --- FIXED INPUTS --- */}
                   <div className="space-y-4">
-                    <input type="text" placeholder="Full Name" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest border-none outline-none focus:ring-1 focus:ring-red-600" onChange={e => setFormData({...formData, fullName: e.target.value})} />
-                    <input type="email" placeholder="Email" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest border-none outline-none focus:ring-1 focus:ring-red-600" onChange={e => setFormData({...formData, email: e.target.value})} />
-                    <input type="text" placeholder="Phone Number" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest border-none outline-none focus:ring-1 focus:ring-red-600" onChange={e => setFormData({...formData, phone: e.target.value})} />
-                    <textarea placeholder="Full Shipping Address" required className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest h-32 border-none outline-none focus:ring-1 focus:ring-red-600" onChange={e => setFormData({...formData, address: e.target.value})} />
+                    <input 
+                      type="text" 
+                      placeholder="Full Name" 
+                      required 
+                      className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest border border-transparent focus:border-red-600 outline-none text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 transition-all" 
+                      onChange={e => setFormData({...formData, fullName: e.target.value})} 
+                    />
+                    <input 
+                      type="email" 
+                      placeholder="Email" 
+                      required 
+                      className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest border border-transparent focus:border-red-600 outline-none text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 transition-all" 
+                      onChange={e => setFormData({...formData, email: e.target.value})} 
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Phone Number" 
+                      required 
+                      className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest border border-transparent focus:border-red-600 outline-none text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 transition-all" 
+                      onChange={e => setFormData({...formData, phone: e.target.value})} 
+                    />
+                    <textarea 
+                      placeholder="Full Shipping Address" 
+                      required 
+                      className="w-full bg-zinc-100 dark:bg-zinc-900 p-4 rounded text-[10px] font-bold uppercase tracking-widest h-32 border border-transparent focus:border-red-600 outline-none text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 transition-all resize-none" 
+                      onChange={e => setFormData({...formData, address: e.target.value})} 
+                    />
                   </div>
                 </div>
                 
@@ -307,23 +323,23 @@ export default function Home() {
                   <div className="flex items-center gap-2 text-blue-500 mb-6 uppercase font-black text-[10px] tracking-widest">
                     <Smartphone size={16} /> GCash QR Payment
                   </div>
-                  <div className="bg-white p-3 rounded-xl border-4 border-blue-500 mb-6">
+                  <div className="bg-white p-3 rounded-xl border-4 border-blue-500 mb-6 shadow-xl">
                     <img src="/gcash.jpg" alt="GCash QR Code" className="w-48 h-48 object-contain" />
                   </div>
                   <p className="text-[10px] font-bold text-zinc-400 mb-8 uppercase tracking-widest leading-relaxed">
-                    Scan to pay <span className="font-black text-foreground">₱{cartTotal}</span>. Then click confirm to process your order.
+                    Scan to pay <span className="text-black dark:text-white font-black underline">₱{cartTotal}</span>. Then click confirm to process.
                   </p>
                   <button 
                     disabled={isProcessing}
                     type="submit" 
-                    className="w-full bg-blue-600 text-white py-5 rounded font-black uppercase text-[10px] tracking-[0.3em] hover:bg-blue-700 transition-all disabled:opacity-50"
+                    className="w-full bg-[#2859ff] text-white py-5 rounded font-black uppercase text-[10px] tracking-[0.3em] hover:bg-[#1a44cc] transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
                   >
                     {isProcessing ? "Verifying..." : "Confirm Payment"}
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="py-20 text-center">
+              <div className="py-20 text-center animate-in zoom-in duration-300">
                 <CheckCircle size={80} className="text-green-500 mx-auto mb-6" />
                 <h3 className="text-3xl font-black italic uppercase tracking-tighter mb-4">Payment Received</h3>
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">A receipt has been sent to {formData.email}</p>
@@ -335,7 +351,7 @@ export default function Home() {
       )}
 
       {/* --- Footer --- */}
-      <footer className="bg-zinc-100 px-8 py-20 dark:bg-zinc-900 text-center border-t border-zinc-200 dark:border-white/5 transition-colors duration-700">
+      <footer className="bg-zinc-100 px-8 py-20 dark:bg-zinc-900 text-center border-t border-zinc-200 dark:border-white/5 transition-colors">
         <h1 className="text-4xl font-black italic tracking-tighter uppercase mb-4">ARC APPAREL</h1>
         <p className="text-[9px] font-bold tracking-[0.4em] text-zinc-400 uppercase mb-8">© 2026 ARC APPAREL GROUP LTD.</p>
         <div className="flex justify-center gap-6">
