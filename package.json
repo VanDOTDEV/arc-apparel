@@ -8,18 +8,14 @@
     "start": "next start",
     "lint": "eslint"
   },
-  "dependencies": {
-<<<<<<< HEAD
-=======
-    "install": "^0.13.0",
->>>>>>> 0042155 (new update)
-    "lucide-react": "^0.563.0",
-    "next": "16.1.6",
-    "next-themes": "^0.4.6",
-    "nodemailer": "^8.0.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
-  },
+"dependencies": {
+  "lucide-react": "^0.563.0",
+  "next": "16.1.6",
+  "next-themes": "^0.4.6",
+  "nodemailer": "^8.0.0",
+  "react": "19.2.3",
+  "react-dom": "19.2.3"
+},
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
